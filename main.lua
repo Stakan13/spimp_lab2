@@ -17,3 +17,28 @@ local function getColor(iter)
     return r, g, b, 1
 end
 
+local function render()
+    local data = love.image.newImageData(WIDTH, HEIGHT)
+    local scale = 3.0 / (zoom * WIDTH)
+
+    for px = 0, WIDTH - 1 do
+        for py = 0, HEIGHT - 1 do
+            local cx = (px - WIDTH / 2) * scale + offsetX
+            local cy = (py - HEIGHT / 2) * scale + offsetY
+
+            local x, y = 0, 0
+            local iter = 0
+
+            while x * x + y * y <= 4 and iter < MAX_ITER do
+                local xn = x * x - y * y + cx
+                y = 2 * x * y + cy
+                x = xn
+                iter = iter + 1
+            end
+
+            data:setPixel(px, py, getColor(iter))
+        end
+    end
+
+    image = love.graphics.newImage(data)
+end
