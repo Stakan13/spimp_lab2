@@ -42,3 +42,69 @@ local function render()
 
     image = love.graphics.newImage(data)
 end
+
+function love.load()
+    love.window.setMode(WIDTH, HEIGHT)
+    love.window.setTitle("Mandelbrot Set  |  scroll = zoom  |  drag = pan  |  R = reset")
+    render()
+end
+
+function love.draw()
+    if image then
+        love.graphics.draw(image, 0, 0)
+    end
+
+    love.graphics.setColor(1, 1, 1, 0.7)
+    love.graphics.print(
+        string.format("zoom: %.2fx   center: (%.4f, %.4f)", zoom, offsetX, offsetY),
+        10, 10
+    )
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function love.wheelmoved(_, dy)
+    if dy > 0 then
+        zoom = zoom * 1.3
+    else
+        zoom = zoom / 1.3
+    end
+    render()
+end
+
+local dragging = false
+local dragStartX, dragStartY
+local dragOffsetX, dragOffsetY
+
+function love.mousepressed(x, y, btn)
+    if btn == 1 then
+        dragging = true
+        dragStartX, dragStartY = x, y
+        dragOffsetX, dragOffsetY = offsetX, offsetY
+    end
+end
+
+function love.mousereleased(_, _, btn)
+    if btn == 1 then
+        dragging = false
+    end
+end
+
+function love.mousemoved(x, y)
+    if dragging then
+        local scale = 3.0 / (zoom * WIDTH)
+        offsetX = dragOffsetX - (x - dragStartX) * scale
+        offsetY = dragOffsetY - (y - dragStartY) * scale
+        render()
+    end
+end
+
+function love.keypressed(key)
+    if key == "r" then
+        zoom = 1.0
+        offsetX = -0.5
+        offsetY = 0.0
+        render()
+    elseif key == "escape" then
+        love.event.quit()
+    end
+end
